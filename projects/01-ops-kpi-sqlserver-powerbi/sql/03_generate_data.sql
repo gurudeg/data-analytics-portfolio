@@ -238,7 +238,12 @@ final AS (
         -- Closed date derived from minutes_to_close (approx)
         CASE
             WHEN c.minutes_to_close IS NULL THEN NULL
-            ELSE DATEADD(DAY, (c.minutes_to_close / 1440), c.created_date)
+            ELSE
+                CASE
+                    WHEN DATEADD(DAY, (c.minutes_to_close / 1440), c.created_date) > @EndDate
+                        THEN @EndDate
+                    ELSE DATEADD(DAY, (c.minutes_to_close / 1440), c.created_date)
+                END
         END AS closed_date,
 
         -- Agent only on closed tickets
